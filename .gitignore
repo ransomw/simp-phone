@@ -1,0 +1,7 @@
+*~
+__pycache__/
+/node_modules/
+/log/
+/server/simp_phone/flask_app/views/frontend/static/css/compiled/
+/server/simp_phone/flask_app/views/frontend/static/js/compiled/
+/test/client/plivo/creds.json

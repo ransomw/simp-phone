@@ -1,0 +1,26 @@
+<div id="plivo-sip-login">
+  <h3>Plivo SIP login</h3>
+  <section class="inputs">
+    <div class="input">
+      <input type="text" placeholder="username000000000000"
+             value={this.state.form_fields.user}
+             onChange={this.mh_change_form_field('user')}
+             />
+    </div>
+    <div class="input">
+      <input type="password" placeholder="password"
+             value={this.state.form_fields.pass}
+             onChange={this.mh_change_form_field('pass')}
+             />
+    </div>
+  </section>
+  <section
+    class="buttons"
+    rt-class="{'loading': this.state.loading}"
+    >
+    <button
+      onClick={this.h_click_login.bind(this)}
+      >login</button>
+  </section>
+</div>
+

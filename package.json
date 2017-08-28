@@ -1,0 +1,35 @@
+{
+  "name": "simp-phone",
+  "version": "0.0.1",
+  "description": "a simple phone for the browser",
+  "dependencies": {
+    "jssip": "^3.0.13",
+    "react": "^15.6.0",
+    "react-dom": "^15.6.0",
+    "ramda": "^0.24.1",
+    "nets": "^3.2.0",
+    "alt": "^0.18.6",
+    "ajv": "^4.9.2",
+    "browserify": "^14.4.0",
+    "watchify": "^3.9.0",
+    "react-templatify": "^0.5.2",
+    "through": "2.3.8",
+    "less": "2.7.2",
+    "yargs": "^8.0.2"
+  },
+  "devDependencies": {
+    "jshint": "^2.9.5",
+    "jsonlint": "^1.6.2",
+    "blue-tape": "^1.0.0",
+    "tap-spec": "^4.1.1",
+    "proxyquire": "^1.7.9",
+    "jssip-node-websocket": "^3.0.0",
+    "jsdom": "^9.0.0",
+    "simple-mock": "^0.7.0",
+    "enzyme": "^2.8.2",
+    "react-addons-test-utils": "^15.6.0"
+  },
+  "engines": {
+    "node": "8.3.1"
+  }
+}

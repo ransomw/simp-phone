@@ -1,0 +1,7 @@
+[MASTER]
+
+init-hook='import sys; import os.path; sys.path.append(os.path.abspath("server"));'
+
+[TYPECHECK]
+# suppess no-member errors
+ignored-modules=webargs.fields

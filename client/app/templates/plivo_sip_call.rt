@@ -1,0 +1,31 @@
+<div id="plivo-sip-call">
+  <h3>Plivo SIP call</h3>
+  <section class="inputs">
+    <div class="input">
+      <input type="text" placeholder="+1 666 555 1234"
+             value={this.state.form_fields.tel}
+             onChange={this.mh_change_form_field('tel')}
+             />
+    </div>
+  </section>
+  <section
+    class="buttons"
+    rt-class="{'loading': this.state.loading}"
+    >
+    <button
+      onClick={this.h_click_call.bind(this)}
+      >call</button>
+  </section>
+  <section
+    rt-if="this.props.media"
+    >
+    <div>
+      <span>call audio</span>
+    </div>
+    <audio
+      ref={this.ref_audio.bind(this)}
+      autoplay>
+    </audio>
+  </section>
+</div>
+
