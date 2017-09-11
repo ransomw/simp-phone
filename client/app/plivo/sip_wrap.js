@@ -1,13 +1,51 @@
+const R = require('ramda')
+const imm = require('immutable')
 const EventEmitter = require('events').EventEmitter
 const WebSocketInterface = require('jssip').WebSocketInterface
 const JssipUserAgent = require('jssip').UA
 
 const PLIVIO_SIP_WS_URL = 'wss://phone.plivo.com:5063'
-const PLIVO_SESSION_TIMERS_EXPIRES = 300
-const PLIVO_STUN_SERVERS = Object.freeze([
-  'stun:stun.l.google.com:19302',
-  'stun:stun1.l.google.com:19302',
-])
+const CALL_OPTS = imm.fromJS({
+  // mediaStream option can presumably used to avoid relying
+  // on jssip to create the browser's "can i haz microphone?"
+  mediaConstraints: {
+    audio: true,
+    video: false,
+  },
+  // defaults to 90 (sec)
+  // bump to avoid 'Session Interval too Small' 422 resp
+  sessionTimersExpires: 300,
+  pcConfig: {iceServers: [{urls: [
+    'stun:stun.l.google.com:19302',
+    'stun:stun1.l.google.com:19302',
+  ]}]},
+})
+const PHONE_REGEXP = new RegExp('^[0-9]{7}[0-9]*$')
+
+/**
+ * ev_fns -- {on:(String, fn), emit:(String, Object)}
+ * ev_names -- [String]
+ * opt_args -- {omit:[String]}
+ */
+const bubble_events = function (ev_fns, ev_names, opt_args) {
+  const opts = opt_args || {}
+  opts.omit = opts.omit || []
+  // ... functional style allows declarative lists
+  R.forEach(R.compose(
+    R.curry(R.apply)(
+      ev_fns.on
+    ),
+    R.juxt([
+      R.identity,
+      (ev_name) => {
+        return R.compose(
+          R.curry(ev_fns.emit)(
+            opts.prefix ? [opts.prefix, ev_name].join(':') : ev_name
+          ),
+          R.partial(R.omit, opts.omit))
+      }])
+  ), ev_names)
+}
 
 class Plivo extends EventEmitter {
   constructor() {
@@ -23,78 +61,67 @@ class Plivo extends EventEmitter {
 
   login(user, pass) {
     const self = this
-    const emit = super.emit.bind(this)
-
+    const jssipUserAgent = new JssipUserAgent({
+      sockets: [self.sock],
+      uri: 'sip:' + user + '@phone.plivo.com',
+      password: pass
+    })
+    bubble_events({
+      on: jssipUserAgent.on.bind(jssipUserAgent),
+      emit: R.nAry(2, super.emit.bind(this)),
+    }, [
+      'connecting',
+      'connected',
+    ], {omit: [
+      'socket',
+    ], prefix: 'ua'})
     return new Promise(function (resolve, reject) {
-      const jssipUserAgent = new JssipUserAgent({
-        sockets: [self.sock],
-        uri: 'sip:' + user + '@phone.plivo.com',
-        password: pass
-      })
-
-      // these can be _all_ wired to super.emit('signal', data),
-      // more cohesively pruning off private (e.g. data.socket) data
-      // and including all useful data from upstream api
-      // (ramda)
-      jssipUserAgent.on('connecting', function (data) {
-        // can `super` be used in here?
-        emit('connecting', {attempts: data.attempts})
-      })
-
-      jssipUserAgent.on('connected', function (data) {
-        emit('connected', {})
-      })
-
       jssipUserAgent.on('registered', function () {
         resolve(self)
       })
-
       jssipUserAgent.on('registrationFailed', function (data) {
-        // todo: don't try reconnects if the password is wrong
+        self.close()
         reject(data.cause)
       })
-
       jssipUserAgent.start()
-
       self._ua = jssipUserAgent
     })
   }
 
   call_tel_num(tel_num) {
     const self = this
-    //todo: check formatting of number in this class
-    if (!self._ua) {
-      throw new Error("user agent not initialized")
-    }
-
-    return new Promise(function (resolve, reject) {
-      // todo: add some way to reject ... optional timeout, perhaps
-      self._ua.on('newRTCSession', function (data) {
-        // http://jssip.net/documentation/3.0.x/api/session/
-        const rtcSess = data.session
-
-        rtcSess.on('accepted', function (ev) {
-          console.log("rtcSess accepted")
-          console.log(ev)
-        })
-
-        rtcSess.on('confirmed', function (ev) {
-          console.log("rtcSess confirmed")
-          console.log(ev)
-          console.log("with current rtcSess")
-          console.log(rtcSess)
-          const mediaStreams = rtcSess.connection.getRemoteStreams()
-          const rcvrs = rtcSess.connection.getReceivers()
-          const mediaStream = mediaStreams[0]
-          const rcvr = rcvrs[0]
-          console.log("all streams and recievers")
-          console.log(mediaStreams)
-          console.log(rcvrs)
+    const self_emit = R.nAry(2, super.emit.bind(this))
+    return Promise.resolve().then(function () {
+      if (!self._ua) {
+        throw new Error("user agent not initialized")
+      }
+      if (tel_num.search(PHONE_REGEXP) === -1) {
+        const err = Error("invalid phone number '" + tel_num + "'")
+        err.name = 'InvalidNumber'
+        throw err
+      }
+      return new Promise(function (resolve, reject) {
+        // todo: add some way to reject ... optional timeout, perhaps
+        self._ua.on('newRTCSession', (data) => resolve(data.session))
+        self._ua.call(tel_num, CALL_OPTS.toJS())
+      })
+    }).then(function (rtc_sess) {
+      bubble_events({
+        on: rtc_sess.on.bind(rtc_sess),
+        emit: self_emit,
+      }, [
+        'accepted',
+        'ended',
+      ], {prefix: 'rtc'})
+      return new Promise(function (resolve, reject) {
+        rtc_sess.on('confirmed', function (ev) {
+          const mediaStream = rtc_sess.connection.getRemoteStreams()[0]
+          const rcvr = rtc_sess.connection.getReceivers()[0]
           if (mediaStream && rcvr) {
             resolve({
               mediaStream: mediaStream,
               mediaStreamTrack: rcvr.track,
-              rtcSess: rtcSess,
+              rtc_sess: rtc_sess,
             })
           } else {
             reject({
@@ -103,40 +130,13 @@ class Plivo extends EventEmitter {
             })
           }
         })
-
-        rtcSess.on('ended', function (ev) {
-          console.log("rtcSess ended")
-          console.log(ev)
-        })
-
-        rtcSess.on('failed', function (ev) {
-          console.log("rtcSess failed")
+        rtc_sess.on('failed', function (ev) {
+          console.log("rtc_sess failed")
           reject({
             msg: "jssip rtcsession failed event",
             data: ev,
           })
         })
-
-        rtcSess.on('addstream', function (ev) {
-          const audioStream = ev.stream
-          console.log("rtcSess addstream")
-          console.log(ev)
-          console.log("audioStream: " + audioStream)
-        })
-
-      })
-
-      self._ua.call(tel_num, {
-        // mediaStream option can presumably used to avoid relying
-        // on jssip to create the browser's "can i haz microphone?"
-        mediaConstraints: {
-          audio: true,
-          video: false,
-        },
-        // defaults to 90 (sec)
-        // bump to avoid 'Session Interval too Small' 422 resp
-        sessionTimersExpires: PLIVO_SESSION_TIMERS_EXPIRES,
-        pcConfig: {iceServers: [{urls: PLIVO_STUN_SERVERS}]},
       })
     })
   }
@@ -146,7 +146,6 @@ class Plivo extends EventEmitter {
       this._ua.stop()
       this._ua = null
     }
-    // there's probably a signal (callback, heck) to catch here
   }
 }
 

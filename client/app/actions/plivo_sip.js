@@ -20,6 +20,8 @@ const PlivoSipActions = alt.createActions({
       }).catch(function (err) {
         console.error("plivo check sip creds error")
         console.error(err)
+      }).then(function () {
+        self._unset_checking_creds()
       })
     }
   },
@@ -36,6 +38,12 @@ const PlivoSipActions = alt.createActions({
         console.error("plivo.call_tell_num err")
         console.error(err)
       })
+    }
+  },
+
+  _unset_checking_creds: function (checking_creds) {
+    return function (dispatch) {
+      dispatch()
     }
   },
 

@@ -1,0 +1,91 @@
+font-size: 1.25rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+
+h3 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+input {
+  font-size: 1em;
+  padding: .1em;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: solid 1px grey;
+  outline: none;
+}
+
+.loading input {
+  color: lightgrey;
+  background: grey;
+}
+
+button {
+  font-size: 1.15em;
+  padding-top: .25em;
+  padding-bottom: .25em;
+  padding-left: .5em;
+  padding-right: .5em;
+  background-color: #00ffff; /* cyan */
+  border: solid .1em black;
+  outline: none;
+}
+
+@login-button-ready-color: #00ffaa;
+
+button:hover {
+  cursor: pointer;
+  background-color: @login-button-ready-color;
+}
+
+button:focus {
+  background-color: @login-button-ready-color;
+}
+
+.button {
+  position: relative;
+  overflow: hidden;
+  border-radius: .25em;
+}
+
+@stripe-width: .3em;
+@color-stripe1: transparent;
+@color-stripe2: blue;
+/* for smooth transition last to first frame */
+/* sqrt(2)=1.14 ensures stripes boundaries match, since 45deg */
+/* 2 ensures stripe colors match, since 2 stripes */
+@anim-scroll-dist: (2 * 1.41421356 * @stripe-width);
+
+.button .overlay {
+  position: absolute;
+  opacity: 0.6;
+  left: 0;
+  width: 100%;
+  /* fudge to avoid calc() */
+  height: 200%;
+  background: repeating-linear-gradient(
+    45deg, @color-stripe1 0, @color-stripe1 @stripe-width,
+    @color-stripe2 @stripe-width, @color-stripe2 (2 * @stripe-width));
+  animation: 0.5s linear 0s infinite scroll-stripes
+}
+
+@keyframes scroll-stripes {
+  from {top: 0;}
+  to {top: (-1 * @anim-scroll-dist);}
+}
+
+@input-margin-bottom: .75em;
+@inputs-margin-bottom: 1em;
+
+section.inputs {
+  margin-top: 1em;
+  margin-bottom: @inputs-margin-bottom - @input-margin-bottom;
+}
+
+div.input {
+  font-size: 1em;
+  margin-bottom: @input-margin-bottom;
+}

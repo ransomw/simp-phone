@@ -13,6 +13,7 @@
     "browserify": "^14.4.0",
     "watchify": "^3.9.0",
     "react-templatify": "^0.5.2",
+    "immutable": "^3.8.1",
     "through": "2.3.8",
     "less": "2.7.2",
     "yargs": "^8.0.2"
@@ -24,10 +25,19 @@
     "tap-spec": "^4.1.1",
     "proxyquire": "^1.7.9",
     "jssip-node-websocket": "^3.0.0",
+    "webdriverio": "^4.8.0",
+    "chromedriver": "^2.32.0",
     "jsdom": "^9.0.0",
     "simple-mock": "^0.7.0",
     "enzyme": "^2.8.2",
     "react-addons-test-utils": "^15.6.0"
+  },
+  "scripts": {
+    "test:comp": "blue-tape -r ./test/client/rt_install test/client/comp/**/*.test.js | tap-spec",
+    "test:plivo": "blue-tape test/client/plivo/**/*.test.js | tap-spec",
+    "test:offline": "npm run test:comp",
+    "test:online": "npm run test:plivo",
+    "test": "npm run test:offline && npm run test:online"
   },
   "engines": {
     "node": "8.3.1"

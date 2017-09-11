@@ -1,6 +1,8 @@
 <div id="plivo-sip-login">
   <h3>Plivo SIP login</h3>
-  <section class="inputs">
+    <section class="inputs"
+           rt-class="{'loading': this.props.checking_creds}"
+           >
     <div class="input">
       <input type="text" placeholder="username000000000000"
              value={this.state.form_fields.user}
@@ -14,13 +16,15 @@
              />
     </div>
   </section>
-  <section
-    class="buttons"
-    rt-class="{'loading': this.state.loading}"
-    >
-    <button
-      onClick={this.h_click_login.bind(this)}
-      >login</button>
+  <section class="buttons">
+    <div class="button">
+      <button
+        onClick={this.h_click_login.bind(this)}
+        >login</button>
+      <div class="overlay"
+           rt-if="this.props.checking_creds"
+           >
+      </div>
+    </div>
   </section>
 </div>
-

@@ -7,11 +7,16 @@
     <title>simp-phone</title>
     <link
       rel="stylesheet" type="text/css"
+      href="{{ url_for('frontend.static', filename='css/loading_spinners.css') }}">
+    <link
+      rel="stylesheet" type="text/css"
       href="{{ url_for('frontend.static', filename='css/compiled/index.css') }}">
   </head>
   <body>
     <div id="app">
-      loading...?
+      <div class="loading-spinner">
+        <span></span>
+      </div>
     </div>
     <script src="{{ url_for('frontend.static', filename='js/compiled/index.js') }}"></script>
   </body>

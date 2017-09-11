@@ -72,8 +72,10 @@ python -m unittest test_simp_phone
 ##### test client
 
 ```
-./bin/test.js
+npm test
 ```
+
+see `package.json` for additional `test:` scripts
 
 ##### build client
 
@@ -95,14 +97,8 @@ pass `--help` flag for more options
 
 ### status
 
-the application is currently pretty much unusable,
+the application is currently mostly pretty much unusable,
 except it does make phone calls.
-most of the (self-contained) messes in the codebase consist of
-api sandboxes around
-[jssip](http://jssip.net/documentation/3.0.x/api/)
-and plivo "callback urls".
-the question of how to test WebRTC's `MediaStream`s remains
-unaddressed.
 
 ### thanks
 

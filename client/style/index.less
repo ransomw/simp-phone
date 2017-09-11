@@ -1,3 +1,23 @@
+body {
+  min-height: 100vh;
+  width: 100%;
+  /* create new block formatting ctx */
+  /* https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Model/Mastering_margin_collapsing */
+  display: flow-root;
+  margin: 0;
+  position: relative;
+}
+
+/* start centered */
 div#app {
-  color: blue;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+div#plivo-sip-login {
+  @import "plivo_sip_login";
 }

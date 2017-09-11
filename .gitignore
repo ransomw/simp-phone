@@ -5,3 +5,5 @@ __pycache__/
 /server/simp_phone/flask_app/views/frontend/static/css/compiled/
 /server/simp_phone/flask_app/views/frontend/static/js/compiled/
 /test/client/plivo/creds.json
+/test/client/plivo/fixture.json
+/test/client/wwwdriver/test_exports.js
