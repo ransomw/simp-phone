@@ -1,0 +1,117 @@
+font-size: 1.4rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+border: solid 3px black;
+border-radius: .5em;
+overflow: hidden;
+
+@tel-num-width: 8em;
+@tel-num-input-font-size: 1.2em;
+@dialpad-button-font-size: 1.1em;
+/* enough to ensure buttons are all the same size */
+@dialpad-button-min-width: 2em;
+@tel-num-input-margin-bottom: .25em;
+@dialpad-row-margin-bottom: .45em;
+@dialpad-margin-bottom: .2em;
+@phone-hook-margin-bottom: .5em;
+
+.num-display {
+  width: @tel-num-width;
+  margin-bottom: @tel-num-input-margin-bottom;
+}
+
+.num-display input {
+  font-size: @tel-num-input-font-size;
+  width: 100%;
+  margin-bottom: @tel-num-input-margin-bottom;
+  text-align: center;
+}
+
+.container.dialpad > * {
+  display: flex;
+  flex-direction: column;
+}
+
+.container.dialpad {
+  @dialpad-margin-lr: .25em;
+  /* (0.1 * @tel-num-input-max-width); */
+  margin-left: @dialpad-margin-lr;
+  margin-right: @dialpad-margin-lr;
+  margin-bottom: @dialpad-margin-bottom;
+}
+
+.container.dialpad > * > * {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: @dialpad-row-margin-bottom;
+}
+
+
+.phone-hook > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: @phone-hook-margin-bottom;
+}
+
+.phone-hook > * button {
+  min-width: 80%;
+  font-size: 1.5em;
+}
+
+button {
+  font-size: @dialpad-button-font-size;
+  padding-top: .25em;
+  padding-bottom: .25em;
+  padding-left: .5em;
+  padding-right: .5em;
+  min-width: @dialpad-button-min-width;
+}
+
+button {
+  background-color: lightgreen;
+  border: solid .1em black;
+  outline: none;
+}
+
+@call-button-ready-color: seagreen;
+
+button:hover {
+  cursor: pointer;
+  background-color: @call-button-ready-color;
+}
+
+button:focus {
+  background-color: @call-button-ready-color;
+}
+
+button.call {
+  background-color: lightgreen;
+}
+
+@call-button-ready-color: seagreen;
+
+button.call:hover {
+
+  background-color: @call-button-ready-color;
+}
+
+button.call:focus {
+  background-color: @call-button-ready-color;
+}
+
+button.end {
+  background-color: lightgreen;
+}
+
+@end-button-ready-color: seagreen;
+
+button.end:hover {
+
+  background-color: @end-button-ready-color;
+}
+
+button.end:focus {
+  background-color: @end-button-ready-color;
+}

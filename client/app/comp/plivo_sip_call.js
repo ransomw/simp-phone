@@ -48,6 +48,10 @@ class PlivoSipCall extends Component {
     }
   }
 
+  cb_click_dialpad(token) {
+    console.log("d"+token)
+  }
+
   render() {
     // note that .bind(this) needs be appended to handlers
     // todo: try to resolve for cleaner templates with no `.bind`

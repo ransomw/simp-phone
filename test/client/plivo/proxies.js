@@ -21,6 +21,7 @@ const plivo__nodews = proxyquire(path_app_src + '/plivo', {
 
 var exports = {}
 
+exports.jssip__nodews = jssip__nodews
 exports.sip_wrap__nodews = sip_wrap__nodews
 exports.plivo__nodews = plivo__nodews
 

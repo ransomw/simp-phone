@@ -52,16 +52,16 @@ const test_login_fail = function (t) {
   return Promise.resolve().then(function () {
     return plivo.login(creds.user, creds.pass.slice(0, -1))
   }).then(function () {
-    t.end("login resolved with bad pass")
+    t.fail("login resolved with bad pass")
     return plivo.close()
   }, function (err) {
     t.pass("login promise rejected with bad pass")
-    return plivo.close()
     t.ok(err, "got non-nil error object")
     t.equals(jssipC.causes.AUTHENTICATION_ERROR, err,
              "got expected error")
     t.equals(jssipC.causes.AUTHENTICATION_ERROR, 'Authentication Error',
              "... and check library documentation only")
+    return plivo.close()
   })
 }
 

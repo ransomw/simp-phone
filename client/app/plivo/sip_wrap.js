@@ -4,23 +4,28 @@ const EventEmitter = require('events').EventEmitter
 const WebSocketInterface = require('jssip').WebSocketInterface
 const JssipUserAgent = require('jssip').UA
 
-const PLIVIO_SIP_WS_URL = 'wss://phone.plivo.com:5063'
-const CALL_OPTS = imm.fromJS({
-  // mediaStream option can presumably used to avoid relying
-  // on jssip to create the browser's "can i haz microphone?"
-  mediaConstraints: {
-    audio: true,
-    video: false,
-  },
-  // defaults to 90 (sec)
-  // bump to avoid 'Session Interval too Small' 422 resp
-  sessionTimersExpires: 300,
-  pcConfig: {iceServers: [{urls: [
-    'stun:stun.l.google.com:19302',
-    'stun:stun1.l.google.com:19302',
-  ]}]},
-})
+const _plivo_conf = require('./plivo_conf.json')
+const PLIVIO_SIP_WS_URL = _plivo_conf.PLIVIO_SIP_WS_URL
+const CALL_OPTS = imm.fromJS(_plivo_conf.CALL_OPTS)
+const timeouts = imm.Map(_plivo_conf.timeouts)
+
 const PHONE_REGEXP = new RegExp('^[0-9]{7}[0-9]*$')
+
+const make_timeout_promise_cb = function (ms, orig_cb) {
+  return function (resolve, reject) {
+    // console.log("top of timeout promise callback")
+    const timeout = setTimeout(function () {
+      const err = new Error("timeout")
+      err.name = 'timeout'
+      reject(err)
+    }, ms)
+    const updated_resolve = function () {
+      clearTimeout(timeout)
+      resolve.apply(this, arguments)
+    }
+    R.nAry(2, orig_cb)(updated_resolve, reject)
+  }
+}
 
 /**
  * ev_fns -- {on:(String, fn), emit:(String, Object)}
@@ -75,17 +80,22 @@ class Plivo extends EventEmitter {
     ], {omit: [
       'socket',
     ], prefix: 'ua'})
-    return new Promise(function (resolve, reject) {
-      jssipUserAgent.on('registered', function () {
-        resolve(self)
-      })
-      jssipUserAgent.on('registrationFailed', function (data) {
-        self.close()
-        reject(data.cause)
-      })
-      jssipUserAgent.start()
-      self._ua = jssipUserAgent
-    })
+    const pcb = make_timeout_promise_cb(
+      timeouts.get('login'),
+      function (resolve, reject) {
+        jssipUserAgent.on('registered', function () {
+          resolve(self)
+        })
+        jssipUserAgent.on('registrationFailed', function (data) {
+          self.close()
+          reject(data.cause)
+        })
+        jssipUserAgent.start()
+        self._ua = jssipUserAgent
+      }
+    )
+    // console.log("made pcb") // prints before top of pcb
+    return new Promise(pcb)
   }
 
   call_tel_num(tel_num) {
@@ -100,11 +110,14 @@ class Plivo extends EventEmitter {
         err.name = 'InvalidNumber'
         throw err
       }
-      return new Promise(function (resolve, reject) {
-        // todo: add some way to reject ... optional timeout, perhaps
+      const pcb = function (resolve, reject) {
         self._ua.on('newRTCSession', (data) => resolve(data.session))
+        // mediaStream option can presumably used to avoid relying
+        // on jssip to create the browser's "can i haz microphone?"
         self._ua.call(tel_num, CALL_OPTS.toJS())
-      })
+      }
+      return new Promise(make_timeout_promise_cb(
+        timeouts.get('call'), pcb))
     }).then(function (rtc_sess) {
       bubble_events({
         on: rtc_sess.on.bind(rtc_sess),
@@ -113,7 +126,7 @@ class Plivo extends EventEmitter {
         'accepted',
         'ended',
       ], {prefix: 'rtc'})
-      return new Promise(function (resolve, reject) {
+      const pcb = function (resolve, reject) {
         rtc_sess.on('confirmed', function (ev) {
           const mediaStream = rtc_sess.connection.getRemoteStreams()[0]
           const rcvr = rtc_sess.connection.getReceivers()[0]
@@ -137,7 +150,9 @@ class Plivo extends EventEmitter {
             data: ev,
           })
         })
-      })
+      }
+      return new Promise(make_timeout_promise_cb(
+        timeouts.get('call'), pcb))
     })
   }
 
