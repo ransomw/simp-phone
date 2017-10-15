@@ -19,6 +19,7 @@
     "yargs": "^8.0.2"
   },
   "devDependencies": {
+    "chokidar-cli": "^1.2.0",
     "jshint": "^2.9.5",
     "jsonlint": "^1.6.2",
     "blue-tape": "^1.0.0",
@@ -33,6 +34,12 @@
     "react-addons-test-utils": "^15.6.0"
   },
   "scripts": {
+    "build:js": "browserify client/app/index.js --debug --transform ./client/react_templatify > server/simp_phone/flask_app/views/frontend/static/js/compiled/index.js",
+    "build:js:cts": "watchify client/app/index.js --debug --transform ./client/react_templatify -o server/simp_phone/flask_app/views/frontend/static/js/compiled/index.js",
+    "build:css": "lessc client/style/index.less server/simp_phone/flask_app/views/frontend/static/css/compiled/index.css",
+    "build:css:cts": "chokidar 'client/style/**/*.less' -c 'npm run build:css' --initial",
+    "build:cts": "npm run build:js:cts & npm run build:css:cts",
+    "build": "npm run build:js && npm run build:css",
     "test:comp": "blue-tape -r ./test/client/rt_install test/client/comp/**/*.test.js | tap-spec",
     "test:plivo": "blue-tape test/client/plivo/**/*.test.js | tap-spec",
     "test:offline": "npm run test:comp",

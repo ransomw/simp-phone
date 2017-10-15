@@ -9,9 +9,14 @@ const jssip__nodews = proxyquire('jssip', {
   './WebSocketInterface': NodeWebSocketInterface,
 })
 
+const login__nodews = proxyquire(
+  path_app_src + '/plivo/sip_wrap/login', {
+    'jssip': jssip__nodews,
+  })
+
 const sip_wrap__nodews = proxyquire(
   path_app_src + '/plivo/sip_wrap', {
-    'jssip': jssip__nodews,
+    './login': login__nodews,
   })
 
 const plivo__nodews = proxyquire(path_app_src + '/plivo', {

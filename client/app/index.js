@@ -3,8 +3,8 @@ const ReactDOM = require('react-dom')
 
 const PlivoSipStore = require('./stores/plivo_sip')
 
-PlivoSipLogin = require('./comp/plivo_sip_login')
-PlivoSipCall = require('./comp/plivo_sip_call')
+const PlivoSipLogin = require('./comp/plivo_sip_login')
+const PlivoSipCall = require('./comp/plivo_sip_call')
 
 const render_root = function (props) {
   const root_component = React.createElement(

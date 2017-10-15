@@ -2,6 +2,8 @@
 
 a simple phone for the browser
 
+![the simpsons](doc/img/the_simpsons.gif)
+
 ##### RFC 7118
 
 [SIP over WebSocket](https://tools.ietf.org/html/rfc7118)
@@ -15,7 +17,23 @@ provides
 and
 [endpoints](https://manage.plivo.com/endpoint/).
 
-login with **endpoint** username and password,
+application configuration in the Plivo web UI involves
+
+* associating a SIP endpoint and phone number with an application
+
+* setting the application's "Answer" and "Hangup" URLs to
+  ```
+  <server_url>/plivourls/answer?caller_id=<phone_number>&sip_username=<sip_username>
+  ```
+  and
+  ```
+  <server_url>/plivourls/hangup
+  ```
+  where `<server_url>` is a publicly visible URL that directs
+  HTTP requests to this application's server
+  (see [below](#run-server)).
+
+login to the phone with **endpoint** username and password,
 _not_ account creds.
 
 ----
@@ -80,10 +98,10 @@ see `package.json` for additional `test:` scripts
 ##### build client
 
 ```
-./bin/build_client.js
+npm run build
 ```
 
-pass `--help` flag for more options
+see `package.json` for additional `build:` scripts
 
 ##### run server
 
@@ -97,8 +115,13 @@ pass `--help` flag for more options
 
 ### status
 
-the application is currently mostly pretty much unusable,
-except it does make phone calls.
+both incoming and outgoing calls are supported,
+tho probably buggy.
+and be further forewarned that the user interface is a nightmare.
+
+it's recommended to deploy to a remote
+_for Plivo callback URLs only_
+— load the UI from a local dev server.
 
 ### thanks
 

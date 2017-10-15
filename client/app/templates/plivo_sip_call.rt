@@ -4,6 +4,29 @@
            />
 
 <div id="plivo-sip-call">
+  <section class="call-listener">
+    <div>
+      <div
+        class="button"
+        >
+        <button
+          onClick={this.h_click_listen}
+          rt-if="!this.props.call_listener && !this.props.answer_cb"
+          >listen</button>
+        <button
+          onClick={this.h_click_close_listener}
+          rt-if="this.props.call_listener && !this.props.answer_cb"
+          >close</button>
+        <button
+          onClick={this.h_click_answer}
+          rt-if="this.props.call_listener && this.props.answer_cb"
+          >answer</button>
+        <div class="overlay"
+             rt-if="this.props.getting_listener || this.state.answering"
+             >
+        </div>
+    </div>
+  </section>
   <section>
     <div class="num-display">
       <input type="text" placeholder="16665551234"
@@ -12,31 +35,56 @@
              />
     </div>
     <div class="container dialpad">
-      {Dialpad(this.cb_click_dialpad.bind(this))}
+      {Dialpad(this.cb_click_dialpad)}
     </div>
-    <div class="phone-hook">
-      <div
-        rt-if="!this.props.media"
-        >
-        <button
-          class="call"
-          onClick={this.h_click_call.bind(this)}
-          >call</button>
+    <div class="phone-hook"
+         rt-if="!(this.state.recently_ended || this.props.err_call)"
+         >
+      <div>
+        <div
+          class="button"
+          rt-if="!this.props.media"
+          >
+          <button
+            class="call"
+            onClick={this.h_click_call}
+            >call</button>
+          <div class="overlay"
+               rt-if="this.props.ringing"
+               >
+          </div>
+        </div>
+        <div
+          class="button"
+          rt-if="this.props.media"
+          >
+          <button
+            class="end"
+            onClick={this.h_click_end}
+            >end</button>
+          <div class="overlay"
+               rt-if="this.props.hanging_up"
+               >
+          </div>
+        </div>
       </div>
-      <div
-        rt-if="this.props.media"
-        >
-        <button
-          class="end"
-          >end</button>
-      </div>
+    </div>
+    <div class="call-status"
+         rt-if="this.state.recently_ended || this.props.err_call"
+         >
+      <span rt-if="this.state.recently_ended">
+        call ended</span>
+      <span rt-if="this.props.err_call && this.props.err_call.name === 'InvalidNumber'">
+        invalid number</span>
+      <span rt-if="this.props.err_call && this.props.err_call.name !== 'InvalidNumber'">
+        call error</span>
     </div>
   </section>
   <section
     rt-if="this.props.media"
     >
     <audio
-      ref={this.ref_audio.bind(this)}
+      ref={this.ref_audio}
       autoplay>
     </audio>
   </section>

@@ -1,6 +1,11 @@
+<rt-import name="err_codes"
+           as="err_codes"
+           from="../plivo/const.js"
+           />
+
 <div id="plivo-sip-login">
   <h3>Plivo SIP login</h3>
-    <section class="inputs"
+  <section class="inputs"
            rt-class="{'loading': this.props.checking_creds}"
            >
     <div class="input">
@@ -16,10 +21,20 @@
              />
     </div>
   </section>
-  <section class="buttons">
+  <section class="login-error"
+           rt-if="this.props.login_error"
+           >
+    <span rt-if="this.props.login_error.err_code === err_codes.get('auth')"
+          >auth error</span>
+    <span rt-if="this.props.login_error.err_code === err_codes.get('timeout')"
+          >timed out</span>
+  </section>
+  <section class="buttons"
+           rt-if="!this.props.login_error"
+           >
     <div class="button">
       <button
-        onClick={this.h_click_login.bind(this)}
+        onClick={this.h_click_login}
         >login</button>
       <div class="overlay"
            rt-if="this.props.checking_creds"

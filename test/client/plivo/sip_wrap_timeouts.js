@@ -28,14 +28,14 @@ const plivo_conf_call_timeout = R.merge(
       },
     })
 
-const Plivo_login = proxyquire(path_app_src + '/plivo/sip_wrap', {
+const login = proxyquire(path_app_src + '/plivo/sip_wrap', {
   './plivo_conf.json': plivo_conf_login_timeout,
-}).Plivo
+}).login
 
-const Plivo_call = proxyquire(path_app_src + '/plivo/sip_wrap', {
+const call_tel_num = proxyquire(path_app_src + '/plivo/sip_wrap', {
   'jssip': require('./proxies').jssip__nodews,
   './plivo_conf.json': plivo_conf_call_timeout,
-}).Plivo
+}).call_tel_num
 
 const plivo_conf = require('./proxies')
 
@@ -65,19 +65,17 @@ const make_timeout_test = function (test_fn) {
 }
 
 const test_connect_timeout = make_timeout_test(function (t) {
-  const plivo = new Plivo_login()
   return Promise.resolve().then(function () {
-    return plivo.login(creds.user, creds.pass)
-  }).then(function () {
+    return login(creds.user, creds.pass)
+  }).then(function (res) {
     t.fail("login resolved instead of timeout")
-    return plivo.close()
+    return res.close()
   }, function (err) {
     t.pass("login promise rejected")
     t.ok(err instanceof Error,
          "rejected with an error")
     t.equal(err.name, 'timeout',
             "error identified as timeout")
-    return plivo.close()
   })
 })
 

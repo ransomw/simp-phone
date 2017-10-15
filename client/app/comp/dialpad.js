@@ -32,8 +32,8 @@ const div_o_many = R.curryN(3, function (key, athing, infos) {
 })
 
 const a_row = R.curryN(3, function (cb, labels, key) {
-  return R.compose(div_o_many(key), button)(cb)
-  (labels)
+  return R.compose(div_o_many(key),
+                   button)(cb)(labels)
 })
 
 const dialpad = function (cb) {

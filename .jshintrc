@@ -1,4 +1,7 @@
 {
   "asi": true,
+  "undef": true,
+  "browserify": true,
+  "devel": true,
   "esversion": 6
 }

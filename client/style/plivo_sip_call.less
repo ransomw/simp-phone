@@ -16,6 +16,32 @@ overflow: hidden;
 @dialpad-margin-bottom: .2em;
 @phone-hook-margin-bottom: .5em;
 
+section.call-listener {
+  margin-bottom: .25em;
+  margin-top: .25em;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+section.call-listener > div {
+  min-width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+section.call-listener .button {
+  width: 100%;
+}
+
+section.call-listener button {
+  width: 100%;
+}
+
 .num-display {
   width: @tel-num-width;
   margin-bottom: @tel-num-input-margin-bottom;
@@ -48,15 +74,22 @@ overflow: hidden;
 }
 
 
+.phone-hook {
+  margin-bottom: @phone-hook-margin-bottom;
+}
+
 .phone-hook > * {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: @phone-hook-margin-bottom;
 }
 
-.phone-hook > * button {
+.phone-hook .button {
   min-width: 80%;
+}
+
+.phone-hook button {
+  width: 100%;
   font-size: 1.5em;
 }
 

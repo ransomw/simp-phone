@@ -13,6 +13,9 @@ const {
   check_sip_creds: check_sip_creds,
   call_tel_num: call_tel_num,
 } = require(path_app_src + '/plivo')
+const {
+  err_codes: plivo_err_codes,
+} = require(path_app_src + '/plivo/const')
 
 const creds = require('./creds.json')
 const {
@@ -28,8 +31,13 @@ const test_check_sip_creds = function (t) {
   ]).then(R.curry(R.apply)(function (
     correct_creds_res,
     bad_pass_res) {
-    t.ok(correct_creds_res, "got truthy result on correct creds")
-    t.notOk(bad_pass_res, "got falsy result on bad pass")
+    t.ok(correct_creds_res.login_ok,
+         "got truthy result on correct creds")
+    t.notOk(bad_pass_res.login_ok,
+            "got falsy result on bad pass")
+    t.equal(bad_pass_res.err_code,
+            plivo_err_codes.get('auth'),
+            "got expected error code on bad pass")
   }))
 }
 
@@ -40,6 +48,8 @@ const wd_test_call_tel_num = make_wd_test(
       return wd_client.timeouts('script', WD_SCRIPT_TIMEOUT)
     }).then(function () {
       return wd_client.executeAsync(function (creds, tel_num, done) {
+        /* jshint browser: true */
+        /* globals Test, MediaStream, MediaStreamTrack */
         Promise.resolve().then(function () {
           return Test.call_tel_num(creds, tel_num)
         }).then(function (res) {

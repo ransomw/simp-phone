@@ -51,7 +51,9 @@ FILES_PYTHON=$(find \
 FILES_JS=$(find \
                client/ \
                bin/ \
-               -name '*.js')
+               test/client/ \
+               -name '*.js' | \
+        grep -v test/client/wwwdriver/test_exports.js)
 FILES_CSS=$(find \
                 client/style/ \
                 -name '*.less')

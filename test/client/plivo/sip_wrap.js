@@ -10,7 +10,10 @@ const {
   make_wd_test: make_wd_test
 } = require('../wd_serve')
 
-const Plivo = require(path_app_src + '/plivo/sip_wrap').Plivo
+const {
+  login,
+  call_tel_num,
+} = require(path_app_src + '/plivo/sip_wrap')
 
 const creds = require('./creds.json')
 const {
@@ -20,79 +23,86 @@ const {
 } = require('./fixture.json')
 
 const test_connect = function (t) {
-  const plivo = new Plivo()
-  t.ok(plivo, "created plivo object")
-  return Promise.resolve().then(function () {
-    return Promise.all(R.flatten([
-      R.map((ev_name) => new Promise(function (resolve, reject) {
-        plivo.on(ev_name, (res) => resolve(res))
-      }), [
-        'ua:connecting',
-        'ua:connected',
-      ]),
-      plivo.login(creds.user, creds.pass),
-    ]))
-  }).then(R.curry(R.apply)(function (
-    res_connecting,
-    res_connected,
-    res_login,
-  ) {
+  const login_res_fns = [
+    'close',
+    'on',
+    'call',
+  ]
+  return Promise.resolve().then(() => {
+    return login(creds.user, creds.pass)
+  }).then((res) => {
     t.pass("connecting and connected events emitted, login resolved")
-    t.equal(typeof res_connecting.attempts, 'number',
-            "connecting event result contains a number of attempts")
-    t.notOk(res_connecting.socket,
-            "no socket attr on the connecting result")
-    return plivo.close()
-  }))
+    t.deepEqual(R.keys(res), login_res_fns,
+                "found expected keys on login result")
+    R.forEach((key) => t.equal(typeof res[key], 'function',
+                               key + " is a function"),
+              login_res_fns)
+    return res.close()
+  }, (err) => {
+    t.fail("error on plivo login")
+    console.error(err)
+  })
 }
 
 const test_login_fail = function (t) {
-  const plivo = new Plivo()
-  t.ok(plivo, "created plivo object")
-  return Promise.resolve().then(function () {
-    return plivo.login(creds.user, creds.pass.slice(0, -1))
-  }).then(function () {
+  return Promise.resolve().then(() => {
+    return login(creds.user, creds.pass.slice(0, -1))
+  }).then((res) => {
     t.fail("login resolved with bad pass")
-    return plivo.close()
-  }, function (err) {
+    return res.close()
+  }, (err) => {
     t.pass("login promise rejected with bad pass")
     t.ok(err, "got non-nil error object")
     t.equals(jssipC.causes.AUTHENTICATION_ERROR, err,
              "got expected error")
     t.equals(jssipC.causes.AUTHENTICATION_ERROR, 'Authentication Error',
              "... and check library documentation only")
-    return plivo.close()
   })
 }
 
 const test_phone_number_format = function (t) {
-  const plivo = new Plivo()
-  t.ok(plivo, "created plivo object")
-  return Promise.resolve().then(function () {
-    return plivo.login(creds.user, creds.pass)
-  }).then(function () {
+  let login_res
+  return Promise.resolve().then(() => {
+    return login(creds.user, creds.pass)
+  }).then((res) => {
     t.pass("login resolved")
-    return plivo.call_tel_num('180055a1234')
-  }).then(function () {
-    return plivo.close()
-    t.end("managed to call non-numeric phone number")
-  }, function (err) {
+    login_res = res
+    return call_tel_num(login_res, '180055a1234')
+  }, (err) => {
+    console.error(err)
+    t.end("unexpected error on login")
+  }).then(() => {
+    const fail_fn = function () {
+      t.end("managed to call non-numeric phone number")
+    }
+    return Promise.resolve().then(() => {
+      return login_res.close()
+    }).then(fail_fn, fail_fn)
+  }, (err) => {
     t.pass("call_tel_num rejected with non-numeric phone number")
     t.ok(err instanceof Error, "and got an error object")
     t.equal(err.name, 'InvalidNumber',
             "it's an 'InvalidNumber' error")
-  }).then(function () {
-    return plivo.call_tel_num('123456')
-  }).then(function () {
-    return plivo.close()
-    t.end("managed to call a phone number without enough digits")
-  }, function (err) {
+  }).then(() => {
+    return call_tel_num(login_res, '123456')
+  }).then(() => {
+    const fail_fn = function () {
+      t.end("managed to call a phone number without enough digits")
+    }
+    return Promise.resolve().then(() => {
+      return login_res.close()
+    }).then(fail_fn, fail_fn)
+  }, (err) => {
     t.pass("rejected a phone number without enough digits")
     t.ok(err instanceof Error, "and got an error object")
     t.equal(err.name, 'InvalidNumber',
             "it's an 'InvalidNumber' error")
-  }).then(function () {
-    return plivo.close()
+  }).then(() => {
+    return login_res.close()
+  }, (err) => {
+    t.fail("unexpected error")
+    console.error(err)
+    return login_res.close()
   })
 }
 
@@ -103,11 +113,18 @@ const wd_test_call_tel_num = make_wd_test(
       return wd_client.timeouts('script', WD_SCRIPT_TIMEOUT)
     }).then(function () {
       return wd_client.executeAsync(function (creds, tel_num, done) {
-        const plivo = new Test.Plivo()
-        return Promise.resolve().then(function () {
-          return plivo.login(creds.user, creds.pass)
-        }).then(function () {
-          return plivo.call_tel_num(tel_num)
+        /* jshint browser: true */
+        /* globals Test, MediaStream, MediaStreamTrack */
+        const {
+          login,
+          call_tel_num,
+        } = Test
+        let login_res
+        return Promise.resolve().then(() => {
+          return login(creds.user, creds.pass)
+        }).then((res) => {
+          login_res = res
+          return call_tel_num(res, tel_num)
         }).then(function (res) {
           if (res.mediaStream instanceof MediaStream &&
               res.mediaStreamTrack instanceof MediaStreamTrack) {

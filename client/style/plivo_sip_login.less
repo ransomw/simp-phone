@@ -45,38 +45,6 @@ button:focus {
   background-color: @login-button-ready-color;
 }
 
-.button {
-  position: relative;
-  overflow: hidden;
-  border-radius: .25em;
-}
-
-@stripe-width: .3em;
-@color-stripe1: transparent;
-@color-stripe2: blue;
-/* for smooth transition last to first frame */
-/* sqrt(2)=1.14 ensures stripes boundaries match, since 45deg */
-/* 2 ensures stripe colors match, since 2 stripes */
-@anim-scroll-dist: (2 * 1.41421356 * @stripe-width);
-
-.button .overlay {
-  position: absolute;
-  opacity: 0.6;
-  left: 0;
-  width: 100%;
-  /* fudge to avoid calc() */
-  height: 200%;
-  background: repeating-linear-gradient(
-    45deg, @color-stripe1 0, @color-stripe1 @stripe-width,
-    @color-stripe2 @stripe-width, @color-stripe2 (2 * @stripe-width));
-  animation: 0.5s linear 0s infinite scroll-stripes
-}
-
-@keyframes scroll-stripes {
-  from {top: 0;}
-  to {top: (-1 * @anim-scroll-dist);}
-}
-
 @input-margin-bottom: .75em;
 @inputs-margin-bottom: 1em;
 
