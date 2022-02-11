@@ -9,7 +9,7 @@
     "ramda": "^0.24.1",
     "nets": "^3.2.0",
     "alt": "^0.18.6",
-    "ajv": "^4.9.2",
+    "ajv": "^6.12.3",
     "browserify": "^14.4.0",
     "watchify": "^3.9.0",
     "react-templatify": "^0.5.2",
