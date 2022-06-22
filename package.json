@@ -28,7 +28,7 @@
     "jssip-node-websocket": "^3.0.0",
     "webdriverio": "^4.8.0",
     "chromedriver": "^2.32.0",
-    "jsdom": "^9.0.0",
+    "jsdom": "^16.5.0",
     "simple-mock": "^0.7.0",
     "enzyme": "^2.8.2",
     "react-addons-test-utils": "^15.6.0"
